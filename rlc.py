@@ -119,14 +119,51 @@ def rlc(resistance, inductance, capacitance):
 
             print(f"i_L(t) = ({D1:.2f}t + {D2:.2f}) * e^(-{neper_freq:.2f}t)")
 
-    graphic_choice = bool(input("Would you like to see the graph of the function? Write 1 for yes, 0 for no"))
+    graphic_choice = bool(input("Would you like to see the graph of the function? Write 1 for yes, 0 for no: "))
 
     if graphic_choice == 1:
-        # add graph making.
-        print("asd")
+
+        if damped == 1:  # Over-damped
+            end_time = 5 * (1 / neper_freq)  # Allow for settling time
+        elif damped == 2:  # Under-damped
+            end_time = 3 * (2 * np.pi / res_freq)  # Few cycles of oscillation
+        else:  # Critically damped
+            end_time = 5 * (1 / neper_freq)  # Similar to over-damped
+
+        t = np.linspace(0, end_time, 1000)  # time from 0 to 10 ms
+        response = np.zeros_like(t)
+
+        if choice == 1:  # Parallel circuit
+            if damped == 1:
+                # Over-damped response
+                response = A1 * np.exp(s_1.real * t) + A2 * np.exp(s_2.real * t)
+            elif damped == 2:
+                # Under-damped response
+                response = B1 * np.cos(w_d * t) * np.exp(-neper_freq * t) + B2 * np.sin(w_d * t) * np.exp(
+                    -neper_freq * t)
+            elif damped == 3:
+                # Critically damped response
+                response = (D1 * t + D2) * np.exp(-neper_freq * t)
+
+        elif choice == 2:  # Serial circuit
+            if damped == 1:
+                response = A1 * np.exp(s_1.real * t) + A2 * np.exp(s_2.real * t)
+            elif damped == 2:
+                response = (B1 * np.cos(w_d * t) + B2 * np.sin(w_d * t)) * np.exp(-neper_freq * t)
+            elif damped == 3:
+                response = (D1 * t + D2) * np.exp(-neper_freq * t)
+
+        # Plot the response
+        plt.figure(figsize=(10, 5))
+        plt.plot(t, response)
+        plt.title('RLC Circuit Response')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Response')
+        plt.grid()
+        plt.show()
 
 
-rlc(9, 0.5, 0.02)
+rlc(200, 50e-3, 0.2e-6)
 
 # serial rlc(560, 0.1, 0.1e-6)
-# parallel connected rlc(20e3, 8, 0.125e-6)
+# rlc(200, 50e-3, 0.2e-6)
