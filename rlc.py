@@ -70,14 +70,14 @@ def rlc(resistance, inductance, capacitance):
 
             print(f"x = {A1}, y = {A2}")
 
-            print(f"x(t) = {A1:.2f}e^{s_1.real:.2f}t)) + {A2:.2f}e^{s_2.real:.2f}t))")
+            print(f"x(t) = {A1:.2f}e^({s_1.real:.2f}t) + {A2:.2f}e^({s_2.real:.2f}t)")
 
         if damped == 2:
             B1 = initial_capacitor_voltage
             w_d = math.sqrt(res_freq_squared - neper_freq_square)
             B2 = (derivative_of_vc + (neper_freq * B1)) / w_d
 
-            print(f"x(t) = {B1:.2f}cos({w_d}*t) + {B2:.2f}sin({w_d}*t) ) e^-{neper_freq}t")
+            print(f"x(t) = ({B1:.2f}cos({w_d:.2f}*t) + {B2:.2f}sin({w_d:.2f}*t))e^-{neper_freq:.2f}t")
 
         if damped == 3:
             D2 = initial_capacitor_voltage
@@ -85,73 +85,68 @@ def rlc(resistance, inductance, capacitance):
 
             print(f"x(t) = ({D1:.2f}t + {D2})e^-{neper_freq}t)")
 
-    elif choice == 2:
-
-        # Serial RLC circuit
+    elif choice == 2:  # Serial RLC circuit
 
         initial_capacitor_voltage = int(input("Initial capacitor voltage (V): "))
-        initial_inductor_current = float(input("Initial inductor current (A): "))
-        derivative_of_il = -(initial_capacitor_voltage / inductance) - (
-                    resistance * initial_inductor_current / inductance)
+        initial_inductor_current = initial_capacitor_voltage / resistance
 
-        if damped == 1:
+        derivative_of_il = -((initial_inductor_current * resistance) + initial_capacitor_voltage) / inductance
 
-            A = np.array([[1, 1], [s_1.real, s_2.real]])
+        if damped == 1:  # over-damp
+
+            # Coefficients matrix
+            A = np.array([[1, 1],
+                          [s_1.real, s_2.real]])  # Use real parts
+
+            # Constants matrix
             B = np.array([initial_inductor_current, derivative_of_il])
+
+            # Solving for [x, y]
             solution = np.linalg.solve(A, B)
 
             A1, A2 = solution
 
-            print(f"i_L(t) = {A1:.2f}e^{s_1.real:.2f}t + {A2:.2f}e^{s_2.real:.2f}t")
+            print(f"x = {A1}, y = {A2}")
 
-        elif damped == 2:
+            print(f"x(t) = {A1:.2f}e^({s_1.real:.2f}t) + {A2:.2f}e^({s_2.real:.2f}t)")
 
-            w_d = math.sqrt(res_freq_squared - neper_freq_square)
+        elif damped == 2:  # under-damp
+
             B1 = initial_inductor_current
+            w_d = math.sqrt(res_freq_squared - neper_freq_square)
             B2 = (derivative_of_il + (neper_freq * B1)) / w_d
 
-            print(f"i_L(t) = ({B1:.2f}cos({w_d:.2f}t) + {B2:.2f}sin({w_d:.2f}t)) * e^(-{neper_freq:.2f}t)")
+            print(f"I(t) = ({B1:.2f}cos({w_d:.2f}*t) + {B2:.2f}sin({w_d:.2f}*t))e^-{neper_freq:.2f}t A")
 
-        elif damped == 3:
-
+        elif damped == 3:  # critical-damp
             D2 = initial_inductor_current
             D1 = derivative_of_il + (neper_freq * D2)
 
-            print(f"i_L(t) = ({D1:.2f}t + {D2:.2f}) * e^(-{neper_freq:.2f}t)")
+            print(f"x(t) = ({D1:.2f}t + {D2})e^-{neper_freq:.2f}t)")
 
-    graphic_choice = bool(input("Would you like to see the graph of the function? Write 1 for yes, 0 for no: "))
+    # Graphing
+    graphic_choice = int(input("Would you like to see the graph of the function? Write 1 for yes, 0 for no: "))
 
     if graphic_choice == 1:
 
         if damped == 1:  # Over-damped
-            end_time = 5 * (1 / neper_freq)  # Allow for settling time
+            end_time = 5 * (1 / neper_freq)
         elif damped == 2:  # Under-damped
-            end_time = 3 * (2 * np.pi / res_freq)  # Few cycles of oscillation
+            end_time = 3 * (2 * np.pi / res_freq)
         else:  # Critically damped
-            end_time = 5 * (1 / neper_freq)  # Similar to over-damped
+            end_time = 5 * (1 / neper_freq)
 
-        t = np.linspace(0, end_time, 1000)  # time from 0 to 10 ms
-        response = np.zeros_like(t)
+        t = np.linspace(0, end_time, 1000)  # initialize time axis
+        response = np.zeros_like(
+            t)  # initilize a zero response to not get an error if the response is not updated with the damping conditions
 
-        if choice == 1:  # Parallel circuit
-            if damped == 1:
-                # Over-damped response
-                response = A1 * np.exp(s_1.real * t) + A2 * np.exp(s_2.real * t)
-            elif damped == 2:
-                # Under-damped response
-                response = B1 * np.cos(w_d * t) * np.exp(-neper_freq * t) + B2 * np.sin(w_d * t) * np.exp(
-                    -neper_freq * t)
-            elif damped == 3:
-                # Critically damped response
-                response = (D1 * t + D2) * np.exp(-neper_freq * t)
-
-        elif choice == 2:  # Serial circuit
-            if damped == 1:
-                response = A1 * np.exp(s_1.real * t) + A2 * np.exp(s_2.real * t)
-            elif damped == 2:
-                response = (B1 * np.cos(w_d * t) + B2 * np.sin(w_d * t)) * np.exp(-neper_freq * t)
-            elif damped == 3:
-                response = (D1 * t + D2) * np.exp(-neper_freq * t)
+        # Y axis, response.
+        if damped == 1:  # Over-damped response
+            response = A1 * np.exp(s_1.real * t) + A2 * np.exp(s_2.real * t)
+        elif damped == 2:  # Under-damped response
+            response = (B1 * np.cos(w_d * t) + B2 * np.sin(w_d * t)) * np.exp(-neper_freq * t)
+        elif damped == 3:  # Critically damped response
+            response = (D1 * t + D2) * np.exp(-neper_freq * t)
 
         # Plot the response
         plt.figure(figsize=(10, 5))
@@ -163,7 +158,5 @@ def rlc(resistance, inductance, capacitance):
         plt.show()
 
 
-rlc(200, 50e-3, 0.2e-6)
-
-# serial rlc(560, 0.1, 0.1e-6)
-# rlc(200, 50e-3, 0.2e-6)
+#rlc(9, 50e-3, 0.2e-6)
+rlc(200,50e-3,0.2e-6)
