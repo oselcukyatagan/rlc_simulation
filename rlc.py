@@ -2,11 +2,10 @@ import cmath
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+import gui
 
 
-def rlc(resistance, inductance, capacitance):
-    print("Type 1 if parallel, 2 if serially connected")
-    choice = int(input("Enter an integer: "))
+def rlc(resistance, inductance, capacitance, initial_capacitor_voltage, initial_inductor_current, choice, graphic_choice):
 
     damped = 0
     res_freq_squared = 1 / (inductance * capacitance)
@@ -44,14 +43,7 @@ def rlc(resistance, inductance, capacitance):
     print(f"s2: {s_2:.2f}")
     print("damped condition:", damped_conditions.get(damped, "Unknown condition"))
 
-    derivative_of_vc = 0
-    initial_capacitor_voltage = 0
-    initial_inductor_current = 0
-
     if choice == 1:
-
-        initial_capacitor_voltage = int(input("Initial capacitor voltage (V): "))
-        initial_inductor_current = float(input("Initial inductor current (A): "))
 
         derivative_of_vc = -(initial_inductor_current + (initial_capacitor_voltage / resistance)) / capacitance
 
@@ -85,10 +77,7 @@ def rlc(resistance, inductance, capacitance):
 
             print(f"x(t) = ({D1:.2f}t + {D2})e^-{neper_freq}t)")
 
-    elif choice == 2:  # Serial RLC circuit
-
-        initial_capacitor_voltage = int(input("Initial capacitor voltage (V): "))
-        initial_inductor_current = initial_capacitor_voltage / resistance
+    elif choice == 2:  # Serial RLC circuite
 
         derivative_of_il = -((initial_inductor_current * resistance) + initial_capacitor_voltage) / inductance
 
@@ -125,8 +114,6 @@ def rlc(resistance, inductance, capacitance):
             print(f"x(t) = ({D1:.2f}t + {D2})e^-{neper_freq:.2f}t)")
 
     # Graphing
-    graphic_choice = int(input("Would you like to see the graph of the function? Write 1 for yes, 0 for no: "))
-
     if graphic_choice == 1:
 
         if damped == 1:  # Over-damped
@@ -137,8 +124,7 @@ def rlc(resistance, inductance, capacitance):
             end_time = 5 * (1 / neper_freq)
 
         t = np.linspace(0, end_time, 1000)  # initialize time axis
-        response = np.zeros_like(
-            t)  # initilize a zero response to not get an error if the response is not updated with the damping conditions
+        response = np.zeros_like(t)  # initilize a zero response to not get an error if the response is not updated with the damping conditions
 
         # Y axis, response.
         if damped == 1:  # Over-damped response
@@ -159,4 +145,4 @@ def rlc(resistance, inductance, capacitance):
 
 
 #rlc(9, 50e-3, 0.2e-6)
-rlc(200,50e-3,0.2e-6)
+#rlc(200,50e-3,0.2e-6)
