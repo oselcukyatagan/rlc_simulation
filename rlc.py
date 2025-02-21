@@ -7,6 +7,8 @@ import gui
 
 def rlc(resistance, inductance, capacitance, initial_capacitor_voltage, initial_inductor_current, choice, graphic_choice):
 
+    result_str = ""
+
     damped = 0
     res_freq_squared = 1 / (inductance * capacitance)
     res_freq = math.sqrt(res_freq_squared)
@@ -43,6 +45,11 @@ def rlc(resistance, inductance, capacitance, initial_capacitor_voltage, initial_
     print(f"s2: {s_2:.2f}")
     print("damped condition:", damped_conditions.get(damped, "Unknown condition"))
 
+    result_str += f"Neper frequency (alpha): {neper_freq:.2f} Hz\n"
+    result_str += f"Resonant frequency (w): {res_freq:.2f} Hz\n"
+    result_str += f"s1: {s_1.real:.2f}, s2: {s_2.real:.2f}\n"
+    result_str += f"Damping condition: {damped_conditions.get(damped, 'Unknown condition')}\n"
+
     if choice == 1:
 
         derivative_of_vc = -(initial_inductor_current + (initial_capacitor_voltage / resistance)) / capacitance
@@ -61,8 +68,10 @@ def rlc(resistance, inductance, capacitance, initial_capacitor_voltage, initial_
             A1, A2 = solution
 
             print(f"x = {A1}, y = {A2}")
+            result_str += f"x = {A1}, y = {A2}\n"
 
             print(f"x(t) = {A1:.2f}e^({s_1.real:.2f}t) + {A2:.2f}e^({s_2.real:.2f}t)")
+            result_str += f"x(t) = {A1:.2f}e^({s_1.real:.2f}t) + {A2:.2f}e^({s_2.real:.2f}t)\n"
 
         if damped == 2:
             B1 = initial_capacitor_voltage
@@ -70,12 +79,14 @@ def rlc(resistance, inductance, capacitance, initial_capacitor_voltage, initial_
             B2 = (derivative_of_vc + (neper_freq * B1)) / w_d
 
             print(f"x(t) = ({B1:.2f}cos({w_d:.2f}*t) + {B2:.2f}sin({w_d:.2f}*t))e^-{neper_freq:.2f}t")
+            result_str += f"x(t) = ({B1:.2f}cos({w_d:.2f}*t) + {B2:.2f}sin({w_d:.2f}*t))e^-{neper_freq:.2f}t\n"
 
         if damped == 3:
             D2 = initial_capacitor_voltage
             D1 = derivative_of_vc + (neper_freq * D2)
 
             print(f"x(t) = ({D1:.2f}t + {D2})e^-{neper_freq}t)")
+            result_str += f"x(t) = ({D1:.2f}t + {D2})e^-{neper_freq}t)\n"
 
     elif choice == 2:  # Serial RLC circuite
 
@@ -96,8 +107,10 @@ def rlc(resistance, inductance, capacitance, initial_capacitor_voltage, initial_
             A1, A2 = solution
 
             print(f"x = {A1}, y = {A2}")
+            result_str += f"x = {A1}, y = {A2}\n"
 
             print(f"x(t) = {A1:.2f}e^({s_1.real:.2f}t) + {A2:.2f}e^({s_2.real:.2f}t)")
+            result_str += f"x(t) = {A1:.2f}e^({s_1.real:.2f}t) + {A2:.2f}e^({s_2.real:.2f}t)\n"
 
         elif damped == 2:  # under-damp
 
@@ -106,12 +119,14 @@ def rlc(resistance, inductance, capacitance, initial_capacitor_voltage, initial_
             B2 = (derivative_of_il + (neper_freq * B1)) / w_d
 
             print(f"I(t) = ({B1:.2f}cos({w_d:.2f}*t) + {B2:.2f}sin({w_d:.2f}*t))e^-{neper_freq:.2f}t A")
+            result_str += f"I(t) = ({B1:.2f}cos({w_d:.2f}*t) + {B2:.2f}sin({w_d:.2f}*t))e^-{neper_freq:.2f}t A\n"
 
         elif damped == 3:  # critical-damp
             D2 = initial_inductor_current
             D1 = derivative_of_il + (neper_freq * D2)
 
             print(f"x(t) = ({D1:.2f}t + {D2})e^-{neper_freq:.2f}t)")
+            result_str += f"x(t) = ({D1:.2f}t + {D2})e^-{neper_freq:.2f}t)\n"
 
     # Graphing
     if graphic_choice == 1:
@@ -142,6 +157,8 @@ def rlc(resistance, inductance, capacitance, initial_capacitor_voltage, initial_
         plt.ylabel('Response')
         plt.grid()
         plt.show()
+
+    return result_str
 
 
 #rlc(9, 50e-3, 0.2e-6)

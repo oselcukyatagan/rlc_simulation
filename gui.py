@@ -65,8 +65,9 @@ class MyApp(QWidget):
             graphic_choice = int(self.graphic_choice.text())
 
            
-            rlc.rlc(resistance, inductance, capacitance, initial_capacitor_voltage, initial_inductor_current, choice, graphic_choice)
+            result_text = rlc.rlc(resistance, inductance, capacitance, initial_capacitor_voltage, initial_inductor_current, choice, graphic_choice)
 
+            self.label.setText(result_text)
         except ValueError:
             self.label.setText("Invalid input! Please enter numerical values.")
 
